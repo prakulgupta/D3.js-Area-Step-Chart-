@@ -1,0 +1,182 @@
+<!-- Copyright: gupta.prakul@gmail.com 
+	 Author: Prakul Gupta
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Step Chart</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
+        <style>
+            svg {
+                border: solid 1px #ccc;
+                font: 10px sans-serif;
+                shape-rendering: crispEdges;
+            }
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: black;
+				shape-rendering: crispEdges;
+			}
+			
+			.axis text {
+				font-family: sans-serif;
+				font-size: 11px;
+			}
+        </style>
+    </head>
+    <body>
+
+        <div id="step-chart"></div>
+ 
+        <script type="text/javascript">
+			// TODO : According to the requirement set w and h and it won't be hard coded.
+            var w = 500, 
+            h = 200;     
+			
+			// 25 Here is the no. of values in a set. We'll be taking it out from our given input. Right now hard coded. 
+			var xScale = d3.scale.linear()
+								 .domain([0, 25]) 
+								 .range([0, w]);
+			//Definition of  X axis
+			var xAxis = d3.svg.axis()
+							  .scale(xScale)
+							  .orient("bottom");			
+            // Canvas Creation 
+            var svg0 = d3.select("#step-chart").append("svg:svg")
+            .attr("class", "chart")
+            .attr("width", w)
+            .attr("height", 500 );
+			
+			var svg = svg0
+					.append("svg")
+					.append("svg:g")
+					.attr("transform", "translate(10,215)");
+			var svg2 = svg0
+					.append("svg")
+					.append("svg:g")
+					.attr("transform", "translate(10,218)");			 
+ 
+            x = d3.scale.linear()
+								 .domain([0, 25])
+								 .range([0, w]);
+            y = d3.scale.linear().range([0, h])
+            z = d3.scale.ordinal().range(["green", "yellow", "orange"])
+ 
+        //  Matrix Structure: ID,c1,c2,c3
+            var matrix = [
+                [ 1, 1, 5, 7 ],
+                [ 2, 2, 6, 8 ],
+                [ 3, 3, 7, 9 ],
+                [ 4, 3, 7, 9 ],
+                [ 5, 3, 7, 9 ],
+				[ 6, 3, 7, 9 ],
+				[ 7, 3, 7, 9 ],
+				[ 8, 3, 7, 9 ],
+				[ 9, 3, 7, 9 ],
+				[10, 3, 7, 9 ],
+				[11, 3, 7, 9 ],
+				[12, 3, 7, 9 ],
+				[13, 3, 7, 9 ],
+				[14, 3, 7, 9 ],
+				[15, 3, 7, 9 ],
+				[16, 3, 7, 9 ],
+				[17, 2, 6, 8 ],
+				[18, 2, 6, 8 ],
+				[19, 2, 6, 8 ],
+				[20, 2, 6, 8 ],
+				[21, 2, 6, 8 ],
+				[22, 2, 6, 8 ],
+				[23, 2, 6, 8 ],
+				[24, 2, 6, 8 ],
+				[25, 2, 6, 8 ],
+            ];
+ 
+            var remapped =["c1","c2","c3"].map(function(dat,i){
+                return matrix.map(function(d,ii){
+                    return {x: ii, y: d[i+1] };
+                })
+            });
+ 
+            var stacked = d3.layout.stack()(remapped)
+            console.log(stacked)
+ 
+            x.domain(stacked[0].map(function(d) { return d.x; }));
+            y.domain([0, d3.max(stacked[stacked.length - 1], function(d) 
+								{ 
+								return d.y0 + d.y; 
+								})]);
+ 
+            // Add a group for each column.
+            var valgroup = svg.selectAll("g.valgroup")
+            .data(stacked)
+            .enter().append("svg:g")
+            .attr("class", "valgroup")
+            .style("fill", function(d, i) 
+						{
+							return z(i); 
+						})
+            
+			var valgroup2 = svg2.selectAll("g.valgroup")
+            .data(stacked)
+            .enter().append("svg:g")
+            .attr("class", "valgroup")
+            .style("fill", function(d, i) 
+						{
+							return z(i); 
+						})
+ 
+            // Add a rectangle for each data.
+            var rect = valgroup.selectAll("rect")
+            .data(function(d)
+					{
+						return d;
+					})
+            .enter().append("svg:rect")
+            .attr("x", function(d) 
+						{
+							return d.x * (w/25); 
+						})
+            .attr("y", function(d) 
+						{ 
+						return -y(d.y0) - y(d.y); 
+						})
+            .attr("height", function(d) 
+							{ 
+								return y(d.y); 
+							})
+            .attr("width", w /25 );
+			
+			//------------------------
+			
+			 var rect2 = valgroup2.selectAll("rect")
+            .data(function(d)
+					{
+						return d;
+					})
+            .enter().append("svg:rect")
+            .attr("x", function(d,i) 
+					{
+						return i * (w /25)
+					})
+            .attr("y", function(d) 
+						{
+							return y(d.y0); 
+						})
+            .attr("height", function(d) 
+							{ 
+								return y(d.y); 
+							})
+            .attr("width", w/25);
+			
+			//---------------------
+
+			   	//Create X axis
+				svg0.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(10," + (480) + ")")
+				.call(xAxis);
+ 
+        </script>
+    </body>
+</html>
